@@ -1,6 +1,6 @@
 import os
 import json
-import nltk
+from nltk.tokenize import sent_tokenize
 
 SQUAD_FILE = "./data/train-v1.1.json"
 OUT_FILE = "./data/intermediate.json"
@@ -8,14 +8,12 @@ OUT_FILE = "./data/intermediate.json"
 def main():
     squadFile = open(SQUAD_FILE, "r")
     squadJSON = json.load(squadFile)
-    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-
     data = []
 
     for dataSQUAD in squadJSON["data"]:
         for paragraphSQUAD in dataSQUAD["paragraphs"]:
             context = paragraphSQUAD["context"]
-            sentences = tokenizer.tokenize(context)
+            sentences = sent_tokenize(context)
             qas = []
             for qaSQUAD in paragraphSQUAD["qas"]:
                 questionStr = qaSQUAD["question"]
