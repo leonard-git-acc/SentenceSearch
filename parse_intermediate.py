@@ -15,7 +15,7 @@ def main():
     interJSON = json.load(interFile)
 
     word_vectors = word2vec.load_word_vectors(KEYEDVECTORS_FILE)
-    print(type(word_vectors.vocab))
+
     data = []
     labels = []
 
@@ -23,18 +23,42 @@ def main():
         doc = paragraph["doc"]
 
         docVec = vectorize_sentences(doc, word_vectors)
-        for i in range(len(docVec)):
-            docVec[i] = sentence_padding(docVec, MAX_SENTENCE_WORDS, word_vectors.vector_size)
+        docVec = doc_padding(docVec, MAX_DOCUMENT_SENTENCES, MAX_SENTENCE_WORDS, word_vectors.vector_size)
+        docFlatVec = docVec.flatten()
+        print(docVec.shape)
 
         for qa in paragraph["qas"]:
             question = qa["question"]
             answer = qa["answerSentence"]
 
-            quesVec = word2vec.vectorize_string(word_vectors, question)
+            quesVec = word2vec.vectorize_string(word_vectors, question).flatten()
+            quesVec = sentence_padding(quesVec, MAX_SENTENCE_WORDS, word_vectors.vector_size)
             ansVec = docVec[answer]
+
+            for sentence in docVec:
+                input = np.concatenate([quesVec, sentence, docFlatVec])
+                input = input.astype(np.float32)
+                data.append(input)
+                print(len(data))
+            
+            pLabel = np.zeros(MAX_DOCUMENT_SENTENCES, np.integer)
+            pLabel[answer] = 1
+            labels.extend(list(pLabel))
+    
+                
+
+def doc_padding(doc, docSize, sentenceSize, vectorSize):
+    """Adds padding to a document"""
+    target = np.zeros((docSize, sentenceSize * vectorSize))
+    for i in range(min(len(doc), docSize)):
+        sentence = sentence_padding(doc[i], sentenceSize, vectorSize)
+        target[i][:len(sentence)] = sentence
+
+    return target
 
 
 def sentence_padding(sentence, sentenceSize, vectorSize):
+    """Adds padding to a sentence"""
     targetSize = sentenceSize * vectorSize
     target = sentence
 
@@ -50,7 +74,9 @@ def sentence_padding(sentence, sentenceSize, vectorSize):
 def vectorize_sentences(sentences, vectors):
     vec = []
     for sen in sentences:
-        vec.append(word2vec.vectorize_string(vectors, sen))
+        res = word2vec.vectorize_string(vectors, sen).flatten()
+        vec.append(res)
+
     return np.array(vec)
 
 

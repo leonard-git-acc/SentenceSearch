@@ -10,13 +10,9 @@ def vectorize_string(vectors, string):
     words = word_tokenize(string)
     words = list(filter(lambda x: x in vectors, words))
     
-    sentence = []
-    for w in words:
+    sentence = np.zeros((len(words), vectors.vector_size))
+    for i, w in enumerate(words):
         vec = vectors[w]
-        sentence.extend(vec)
+        sentence[i][:len(vec)] = vec
 
     return sentence
-
-def get_vector_shape(vectors):
-
-    return item.shape

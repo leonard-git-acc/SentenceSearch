@@ -5,6 +5,7 @@ from nltk.tokenize import sent_tokenize
 SQUAD_FILE = "./data/train-v1.1.json"
 OUT_FILE = "./data/intermediate.json"
 
+
 def main():
     squadFile = open(SQUAD_FILE, "r")
     squadJSON = json.load(squadFile)
@@ -17,7 +18,6 @@ def main():
             qas = []
             for qaSQUAD in paragraphSQUAD["qas"]:
                 questionStr = qaSQUAD["question"]
-                answerStr = qaSQUAD["answers"][0]["text"]
                 answerStart = qaSQUAD["answers"][0]["answer_start"]
 
                 answerSentence = get_sentence_index(sentences, answerStart)
@@ -41,7 +41,6 @@ def get_sentence_index(sentences, answerStart):
         count = count + len(se)
         if count > answerStart:
             return i
-
 
 
 if __name__ == "__main__":

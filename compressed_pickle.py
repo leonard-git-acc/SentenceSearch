@@ -4,7 +4,7 @@ import gzip
 
 def save(object, filename, bin = 1):
     file = gzip.GzipFile(filename, 'wb')
-    pickle.dump(object, file, protocol)
+    pickle.dump(object, file, bin)
     file.close()
 
 
