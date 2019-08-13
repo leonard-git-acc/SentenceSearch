@@ -27,6 +27,8 @@ flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 NAME = "sentsearch_nn_{}".format(int(time.time()))
 
 def main(_):
+    tf.logging.set_verbosity(tf.logging.INFO)
+
     model = None
     if FLAGS.saved_model_path != None:
         model = tf.keras.models.load_model(FLAGS.saved_model_path)

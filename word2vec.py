@@ -3,7 +3,7 @@ from nltk.tokenize import word_tokenize
 import numpy as np
 
 def load_word_vectors(path, binary=True):
-    word_vectors = KeyedVectors.load_word2vec_format(path, binary=binary)
+    word_vectors = KeyedVectors.load_word2vec_format(path, binary=binary, unicode_errors='ignore')
     return word_vectors
 
 def vectorize_string(vectors, string):
