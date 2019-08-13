@@ -1,13 +1,14 @@
 import os
 import json
+import sys
 from nltk.tokenize import sent_tokenize
 
-SQUAD_FILE = "./data/dev-v1.1.json"
-OUT_FILE = "./data/test.json"
-
-
 def main():
-    squadFile = open(SQUAD_FILE, "r")
+    args = sys.argv
+    squad_path = args[1]
+    out_path = args[2]
+
+    squadFile = open(squad_path, "r")
     squadJSON = json.load(squadFile)
     data = []
 
@@ -32,8 +33,9 @@ def main():
             para["qas"] = qas
             data.append(para)
 
-    outFile = open(OUT_FILE, "w")
+    outFile = open(out_path, "w")
     json.dump(data, outFile)
+
 
 def get_sentence_index(sentences, answerStart):
     count = 0

@@ -5,59 +5,72 @@ import tensorflow as tf
 from qas_generator import create_qas_generator, get_sample_len
 from create_model import create_model
 
-TRAIN_FILE = "./data/train.json"
-TEST_FILE = "./data/test.json"
-KEYEDVECTORS_FILE = "./data/GoogleNews-vectors-negative300-SLIM.bin"
-SAVE_DIR = "./models"
-MAX_SENTENCE_WORDS = 24
-MAX_DOCUMENT_SENTENCES = 16
+flags = tf.flags
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string("keyedvectors_path", None, "Path to keyed vectors file")
+flags.DEFINE_string("train_path", None, "Path to train json file")
+flags.DEFINE_string("test_path", None, "Path to test json file")
+flags.DEFINE_string("out_dir", None, "Output dir of the model and logs")
+flags.DEFINE_string("saved_model_path", None, "Saved path for a model to load")
+
+flags.DEFINE_integer("max_sentence_words", 24, "Maximum words a sentence can have")
+flags.DEFINE_integer("max_document_sentences", 16, "Maximum sentences a document can have")
+
+flags.DEFINE_integer("steps_per_epoch", 100000, "Steps per epoch")
+flags.DEFINE_integer("epochs", 4, "Amount of total epochs")
+flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will create per batch")
+
+flags.DEFINE_boolean("do_train", True, "True, if model should be trained")
+flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 
 NAME = "sentsearch_nn_{}".format(int(time.time()))
-STEPS_PER_EPOCH = 100000
-EPOCHS = 4
-BATCH_SIZE = 32
 
-def main():
-    log_dir = os.path.join("logs", "train", NAME)
+def main(_):
+    model = None
+    if FLAGS.saved_model_path != None:
+        model = tf.keras.models.load_model(FLAGS.saved_model_path)
+    else:
+        model = create_model()
 
-    tensorboard = tf.keras.callbacks.TensorBoard(
-                log_dir=log_dir,
-                batch_size=BATCH_SIZE)
+    if not os.path.isdir(FLAGS.out_dir):
+        tf.io.gfile.mkdir(FLAGS.out_dir)
 
-    train_gen = create_qas_generator(
-            TRAIN_FILE, 
-            KEYEDVECTORS_FILE, 
-            MAX_DOCUMENT_SENTENCES, 
-            MAX_SENTENCE_WORDS,
-            batchSize=BATCH_SIZE,
-            mode="train")
+    if FLAGS.do_train:
+        train_gen = create_qas_generator(
+                FLAGS.train_path, 
+                FLAGS.keyedvectors_path, 
+                FLAGS.max_document_sentences, 
+                FLAGS.max_sentence_words, 
+                batchSize=FLAGS.batch_size,
+                mode="train")
 
-    test_gen = create_qas_generator(
-            TEST_FILE, 
-            KEYEDVECTORS_FILE, 
-            MAX_DOCUMENT_SENTENCES, 
-            MAX_SENTENCE_WORDS, 
-            mode="eval")
+        model.fit_generator(
+                train_gen,
+                steps_per_epoch=FLAGS.steps_per_epoch,
+                validation_data=train_gen,
+                validation_steps=FLAGS.steps_per_epoch,
+                epochs=FLAGS.epochs)
+                
+        model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
+        
+    elif FLAGS.do_test:
+        test_gen = create_qas_generator(
+                FLAGS.test_path, 
+                FLAGS.keyedvectors_path, 
+                FLAGS.max_document_sentences, 
+                FLAGS.max_sentence_words, 
+                mode="eval")
 
-    model = create_model()
+        val_loss, val_acc = model.evaluate_generator(
+                test_gen,
+                steps=FLAGS.steps_per_epoch)
 
-    model.fit_generator(
-        train_gen,
-        steps_per_epoch=STEPS_PER_EPOCH,
-        validation_data=train_gen,
-        validation_steps=STEPS_PER_EPOCH,
-        epochs=EPOCHS,
-        callbacks=[tensorboard])
+        print("Loss: " + val_loss)
+        print("Accuracy: " + val_acc)
 
-    model.save(os.path.join(SAVE_DIR, NAME + ".model"))
-
-    val_loss, val_acc = model.evaluate_generator(
-            test_gen,
-            steps=STEPS_PER_EPOCH,
-            callbacks=[tensorboard])
-
-    print("Loss: " + val_loss)
-    print("Accuracy: " + val_acc)
 
 if __name__ == "__main__":
-    main()
+    flags.mark_flag_as_required("keyedvectors_path")
+    flags.mark_flag_as_required("out_dir")
+    tf.app.run(main=main)
