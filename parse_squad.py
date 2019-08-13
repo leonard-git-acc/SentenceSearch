@@ -2,8 +2,8 @@ import os
 import json
 from nltk.tokenize import sent_tokenize
 
-SQUAD_FILE = "./data/train-v1.1.json"
-OUT_FILE = "./data/intermediate.json"
+SQUAD_FILE = "./data/dev-v1.1.json"
+OUT_FILE = "./data/test.json"
 
 
 def main():

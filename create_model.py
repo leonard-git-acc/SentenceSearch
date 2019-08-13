@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 def create_model():
-    model = tf.keras.models.Sequential();
+    model = tf.keras.models.Sequential()
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(500, activation=tf.nn.relu))

@@ -38,12 +38,16 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                     totalCount = totalCount + 1
 
                     if not (batchCount < batchSize):
-                        yield (data, labels)
+                        if mode == "train":
+                            shuffle_in_unison(data, labels)
+                            yield (data, labels)
+                        elif mode == "eval":
+                            yield (data, labels)
+                        
                         data = np.zeros((batchSize, inputSize))
                         labels = np.zeros(batchSize)
                         batchCount = 0
-    
-                
+                                     
 
 def doc_padding(doc, docSize, sentenceSize, vectorSize):
     """Adds padding to a document"""
@@ -80,3 +84,9 @@ def vectorize_sentences(sentences, vectors):
 
 def get_sample_len(docSize, sentenceSize, vectorSize):
     return sentenceSize * vectorSize * 2 + docSize * sentenceSize * vectorSize
+
+def shuffle_in_unison(a, b):
+    rng_state = np.random.get_state()
+    np.random.shuffle(a)
+    np.random.set_state(rng_state)
+    np.random.shuffle(b)
