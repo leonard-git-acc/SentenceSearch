@@ -2,6 +2,7 @@ import os
 import json
 import sys
 from nltk.tokenize import sent_tokenize
+from preprocessing import 
 
 def main():
     args = sys.argv
@@ -35,14 +36,6 @@ def main():
 
     outFile = open(out_path, "w")
     json.dump(data, outFile)
-
-
-def get_sentence_index(sentences, answerStart):
-    count = 0
-    for i, se in enumerate(sentences):
-        count = count + len(se)
-        if count > answerStart:
-            return i
 
 
 if __name__ == "__main__":

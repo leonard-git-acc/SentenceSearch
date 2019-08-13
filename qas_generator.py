@@ -2,7 +2,7 @@ import os
 import json
 import word2vec
 import numpy as np
-import compressed_pickle as pickle
+from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, get_sample_len
 
 def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
     interFile = open(inputPath, "r")
@@ -46,47 +46,4 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                         
                         data = np.zeros((batchSize, inputSize))
                         labels = np.zeros(batchSize)
-                        batchCount = 0
-                                     
-
-def doc_padding(doc, docSize, sentenceSize, vectorSize):
-    """Adds padding to a document"""
-    target = np.zeros((docSize, sentenceSize * vectorSize))
-    for i in range(min(len(doc), docSize)):
-        sentence = sentence_padding(doc[i], sentenceSize, vectorSize)
-        target[i][:len(sentence)] = sentence
-
-    return target
-
-
-def sentence_padding(sentence, sentenceSize, vectorSize):
-    """Adds padding to a sentence"""
-    targetSize = sentenceSize * vectorSize
-    target = sentence
-
-    if len(sentence) < targetSize:
-        padding = targetSize - len(sentence)
-        target = np.pad(target, (0, padding), 'constant')
-    elif len(sentence) > targetSize:
-        target = target[:targetSize]
-
-    return target
-
-
-def vectorize_sentences(sentences, vectors):
-    vec = []
-    for sen in sentences:
-        res = word2vec.vectorize_string(vectors, sen).flatten()
-        vec.append(res)
-
-    return np.array(vec)
-
-
-def get_sample_len(docSize, sentenceSize, vectorSize):
-    return sentenceSize * vectorSize * 2 + docSize * sentenceSize * vectorSize
-
-def shuffle_in_unison(a, b):
-    rng_state = np.random.get_state()
-    np.random.shuffle(a)
-    np.random.set_state(rng_state)
-    np.random.shuffle(b)
+                        batchCount = 

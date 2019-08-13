@@ -34,9 +34,10 @@ def get_title(obj):
         if field["name"] == "title":
             return field["value"]
 
-            
+
 def get_sentences(obj):
-    sentences = sent_tokenize(obj["content"])
+    text = obj["content"].replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")
+    sentences = sent_tokenize(text)
     rndNum = random.randint(0, len(sentences) - 1)
 
     buffer = sentences[0]

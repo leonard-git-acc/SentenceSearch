@@ -16,3 +16,8 @@ def vectorize_string(vectors, string):
         sentence[i][:len(vec)] = vec
 
     return sentence
+
+#vec = load_word_vectors("./data/german.model")
+#out = vec.most_similar(positive=["Koenig", "Frau"], negative=["Mann"])
+#print(out)
+#print(vectorize_string(vec, "Hallo, mein Name ist").shape)
