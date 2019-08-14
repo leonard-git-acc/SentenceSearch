@@ -50,8 +50,6 @@ def main(_):
         model.fit_generator(
                 train_gen,
                 steps_per_epoch=FLAGS.steps_per_epoch,
-                validation_data=train_gen,
-                validation_steps=FLAGS.steps_per_epoch,
                 epochs=FLAGS.epochs)
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))

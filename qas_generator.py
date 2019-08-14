@@ -14,8 +14,10 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
     while True: 
         data = np.zeros((batchSize, inputSize))
         labels = np.zeros(batchSize)
+
         batchCount = 0
         totalCount = 0
+        trainSwitch = False
         
         for paragraph in interJSON:
             doc = paragraph["doc"]
@@ -32,6 +34,13 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                 quesVec = sentence_padding(quesVec, maxSentenceWords, word_vectors.vector_size)
 
                 for i, sentence in enumerate(docVec):
+                    #balances trainig data: 50% positives and 50% negatives
+                    if mode == "train":
+                        if trainSwitch and answer != i:
+                            continue
+
+                    trainSwitch = not trainSwitch
+
                     data[batchCount] = np.concatenate([quesVec, sentence, docFlatVec])
                     labels[batchCount] = int(answer == i)
                     batchCount = batchCount + 1

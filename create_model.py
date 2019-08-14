@@ -8,7 +8,7 @@ def create_model():
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
 
-    opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+    opt = tf.keras.optimizers.Adam(lr=1e-3)
     model.compile(optimizer=opt,
                   loss='binary_crossentropy',
                   metrics=['accuracy'])
