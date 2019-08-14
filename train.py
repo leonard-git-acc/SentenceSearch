@@ -18,7 +18,7 @@ flags.DEFINE_integer("max_sentence_words", 24, "Maximum words a sentence can hav
 flags.DEFINE_integer("max_document_sentences", 16, "Maximum sentences a document can have")
 
 flags.DEFINE_integer("steps_per_epoch", 100000, "Steps per epoch")
-flags.DEFINE_integer("epochs", 4, "Amount of total epochs")
+flags.DEFINE_integer("epochs", 1, "Amount of total epochs")
 flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will create per batch")
 
 flags.DEFINE_boolean("do_train", True, "True, if model should be trained")
@@ -56,7 +56,7 @@ def main(_):
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
         
-    elif FLAGS.do_test:
+    if FLAGS.do_test:
         test_gen = create_qas_generator(
                 FLAGS.test_path, 
                 FLAGS.keyedvectors_path, 
@@ -68,8 +68,8 @@ def main(_):
                 test_gen,
                 steps=FLAGS.steps_per_epoch)
 
-        print("Loss: " + val_loss)
-        print("Accuracy: " + val_acc)
+        print("Loss: " + str(val_loss))
+        print("Accuracy: " + str(val_acc))
 
 
 if __name__ == "__main__":

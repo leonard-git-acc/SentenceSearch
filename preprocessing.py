@@ -103,3 +103,14 @@ def shuffle_in_unison(a, b):
     np.random.shuffle(a)
     np.random.set_state(rng_state)
     np.random.shuffle(b)
+
+
+def checksum(data):
+    sum = 0
+    for doc in data:
+        docsum = 0
+        for sample in doc:
+            docsum = docsum + np.sum(sample)
+        sum = sum + docsum
+
+    return sum

@@ -2,7 +2,7 @@ import os
 import json
 import word2vec
 import numpy as np
-from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, get_sample_len
+from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, get_sample_len, checksum
 
 def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
     interFile = open(inputPath, "r")
@@ -40,10 +40,11 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                     if not (batchCount < batchSize):
                         if mode == "train":
                             shuffle_in_unison(data, labels)
+                            #print(checksum(data))
                             yield (data, labels)
                         elif mode == "eval":
                             yield (data, labels)
                         
                         data = np.zeros((batchSize, inputSize))
                         labels = np.zeros(batchSize)
-                        batchCount = 
+                        batchCount = 0
