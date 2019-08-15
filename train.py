@@ -55,6 +55,7 @@ def main(_):
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
         
     if FLAGS.do_test:
+        print("Test started!")
         test_gen = create_qas_generator(
                 FLAGS.test_path, 
                 FLAGS.keyedvectors_path, 

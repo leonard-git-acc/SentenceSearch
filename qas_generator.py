@@ -52,6 +52,7 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                             #print(checksum(data))
                             yield (data, labels)
                         elif mode == "eval":
+                            print("TestBatch: " + str(totalCount))
                             yield (data, labels)
                         
                         data = np.zeros((batchSize, inputSize))
