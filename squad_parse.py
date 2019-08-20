@@ -2,7 +2,7 @@ import os
 import json
 import sys
 from nltk.tokenize import sent_tokenize
-from preprocessing import 
+from preprocessing import get_sentence_index
 
 def main():
     args = sys.argv

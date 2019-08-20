@@ -20,7 +20,7 @@ def main():
 
     print("Question: ")
     question = input()
-    quesVec = word2vec.vectorize_string(word_vec, question)
+    quesVec = word2vec.vectorize_string(word_vec, question).flatten()
     quesVec = sentence_padding(quesVec, SENTENCE_SIZE, word_vec.vector_size)
 
     docNames = [] #document names

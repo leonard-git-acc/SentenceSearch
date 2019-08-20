@@ -3,7 +3,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from qas_generator import create_qas_generator, get_sample_len
-from create_model import create_model
+from create_model import create_model_nn, create_model_cnn
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -32,12 +32,12 @@ def main(_):
     model = None
     if FLAGS.saved_model_path != None:
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
+        model.summary()
     else:
-        model = create_model()
+        model = create_model_nn()
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
-
     if FLAGS.do_train:
         train_gen = create_qas_generator(
                 FLAGS.train_path, 
@@ -45,7 +45,8 @@ def main(_):
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
-                mode="train")
+                mode="train",
+                model="nn")
 
         model.fit_generator(
                 train_gen,
@@ -61,7 +62,8 @@ def main(_):
                 FLAGS.keyedvectors_path, 
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
-                mode="eval")
+                mode="eval",
+                model="nn")
 
         val_loss, val_acc = model.evaluate_generator(
                 test_gen,

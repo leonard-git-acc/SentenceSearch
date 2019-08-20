@@ -1,10 +1,11 @@
 import os
 import json
 import word2vec
+import math
 import numpy as np
 from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, get_sample_len, checksum
 
-def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
+def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train", model="cnn"):
     interFile = open(inputPath, "r")
     interJSON = json.load(interFile)
 
@@ -40,13 +41,16 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                             continue
 
                     trainSwitch = not trainSwitch
-
-                    data[batchCount] = np.concatenate([quesVec, sentence, docFlatVec])
+                    item = np.concatenate([quesVec, sentence, docFlatVec])
+                    data[batchCount] = item
                     labels[batchCount] = int(answer == i)
                     batchCount = batchCount + 1
                     totalCount = totalCount + 1
 
                     if not (batchCount < batchSize):
+                        if model == "cnn":
+                            data = data.reshape(batchSize, inputSize, 1)
+                            
                         if mode == "train":
                             shuffle_in_unison(data, labels)
                             #print(checksum(data))
