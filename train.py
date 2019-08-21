@@ -17,7 +17,7 @@ flags.DEFINE_string("saved_model_path", None, "Saved path for a model to load")
 flags.DEFINE_integer("max_sentence_words", 24, "Maximum words a sentence can have")
 flags.DEFINE_integer("max_document_sentences", 16, "Maximum sentences a document can have")
 
-flags.DEFINE_integer("steps_per_epoch", 100000, "Steps per epoch")
+flags.DEFINE_integer("batches_per_epoch", 100000, "Steps per epoch")
 flags.DEFINE_integer("epochs", 1, "Amount of total epochs")
 flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will create per batch")
 
@@ -50,7 +50,7 @@ def main(_):
 
         model.fit_generator(
                 train_gen,
-                steps_per_epoch=FLAGS.steps_per_epoch,
+                steps_per_epoch=FLAGS.batches_per_epoch,
                 epochs=FLAGS.epochs)
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
@@ -67,7 +67,7 @@ def main(_):
 
         val_loss, val_acc = model.evaluate_generator(
                 test_gen,
-                steps=FLAGS.steps_per_epoch)
+                steps=FLAGS.batches_per_epoch)
 
         print("Loss: " + str(val_loss))
         print("Accuracy: " + str(val_acc))

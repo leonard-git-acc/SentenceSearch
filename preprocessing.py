@@ -90,6 +90,8 @@ def get_sentence_index(sentences, charIndex):
         count = count + len(se)
         if count > charIndex:
             return i
+        elif i >= len(sentences) - 1:
+            return i
 
 
 def get_sample_len(docSize, sentenceSize, vectorSize):

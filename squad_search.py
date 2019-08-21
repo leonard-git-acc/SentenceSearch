@@ -8,7 +8,7 @@ from nltk.tokenize import sent_tokenize
 
 TEST_PATH = "./data/test.json"
 KEYEDVECTORS_PATH = "./data/english.bin"
-MODEL_PATH = "./output/sentsearch_nn_1565784664.model"
+MODEL_PATH = "./output/sentsearch_nn_1566389698.model"
 
 DOC_SIZE = 16
 SENTENCE_SIZE = 24
