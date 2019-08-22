@@ -11,7 +11,7 @@ KEYEDVECTORS_PATH = "./data/english.bin"
 MODEL_PATH = "./output/sentsearch_nn_1566389698.model"
 
 DOC_SIZE = 16
-
+word_vec = word2vec.load_word_vectors(KEYEDVECTORS_PATH)
 def main():
     word_vec = word2vec.load_word_vectors(KEYEDVECTORS_PATH)
     model = tf.keras.models.load_model(MODEL_PATH)
@@ -48,6 +48,7 @@ def evaluate_doc(quesVec, docVec, model):
     docVecFlat = docVec.flatten()
     for i, senVec in enumerate(docVec):
          sample = np.concatenate([quesVec, senVec, docVecFlat])
+         print(word2vec.devectorize_array(word_vec, sample))
          sample = np.array([sample])
          pred = model.predict(sample)
          predictions[i] = pred[0]
