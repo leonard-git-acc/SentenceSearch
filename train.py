@@ -24,7 +24,7 @@ flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will cre
 flags.DEFINE_boolean("do_train", True, "True, if model should be trained")
 flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 
-NAME = "sentsearch_cnn_{}".format(int(time.time()))
+NAME = "sentsearch_nn_{}".format(int(time.time()))
 
 def main(_):
     tf.logging.set_verbosity(tf.logging.INFO)
@@ -34,7 +34,7 @@ def main(_):
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_cnn()
+        model = create_model_nn()
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
@@ -46,7 +46,7 @@ def main(_):
                 FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
                 mode="train",
-                model="cnn")
+                model="nn")
 
         model.fit_generator(
                 train_gen,
@@ -63,7 +63,7 @@ def main(_):
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
                 mode="eval",
-                model="cnn")
+                model="nn")
 
         val_loss, val_acc = model.evaluate_generator(
                 test_gen,

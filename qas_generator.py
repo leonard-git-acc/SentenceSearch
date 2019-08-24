@@ -14,7 +14,7 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
     
     while True: 
         data = np.zeros((batchSize, inputSize))
-        labels = np.zeros(batchSize)
+        labels = np.zeros((batchSize, 2))
 
         batchCount = 0
         totalCount = 0
@@ -42,8 +42,10 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
 
                     trainSwitch = not trainSwitch
                     item = np.concatenate([quesVec, sentence, docFlatVec])
+
                     data[batchCount] = item
-                    labels[batchCount] = int(answer == i)
+                    labels[batchCount][int(answer == i)] = 1
+
                     batchCount = batchCount + 1
                     totalCount = totalCount + 1
 
@@ -60,5 +62,5 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                             yield (data, labels)
                         
                         data = np.zeros((batchSize, inputSize))
-                        labels = np.zeros(batchSize)
+                        labels = np.zeros((batchSize, 2))
                         batchCount = 0

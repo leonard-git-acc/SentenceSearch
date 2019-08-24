@@ -11,7 +11,7 @@ def create_model_cnn():
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(100, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
+    model.add(tf.keras.layers.Dense(2, activation=tf.nn.sigmoid))
 
     opt = tf.keras.optimizers.Adam(lr=1e-3)
     model.compile(optimizer=opt,
@@ -26,7 +26,7 @@ def create_model_nn():
     model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(500, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
+    model.add(tf.keras.layers.Dense(2, activation=tf.nn.sigmoid))
 
     opt = tf.keras.optimizers.Adam(lr=1e-3)
     model.compile(optimizer=opt,
