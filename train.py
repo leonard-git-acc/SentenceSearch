@@ -3,7 +3,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from qas_generator import create_qas_generator, get_sample_len
-from create_model import create_model_nn, create_model_cnn
+from create_model import create_model_nn, create_model_cnn, create_model_gru
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -34,7 +34,7 @@ def main(_):
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_nn()
+        model = create_model_gru()
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
@@ -46,7 +46,7 @@ def main(_):
                 FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
                 mode="train",
-                model="nn")
+                model="cnn")
 
         model.fit_generator(
                 train_gen,
@@ -63,7 +63,7 @@ def main(_):
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
                 mode="eval",
-                model="nn")
+                model="cnn")
 
         val_loss, val_acc = model.evaluate_generator(
                 test_gen,
