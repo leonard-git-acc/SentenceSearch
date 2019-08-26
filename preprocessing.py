@@ -65,7 +65,7 @@ def vectorize_sentences(sentences, vectors):
     Parameters:
     -----------
     sentences : list of strings
-    vectors : Word2VecKeyedVectors
+    vectors : WordVectors
     Returns:
     -------
     out : 2D numpy array
@@ -73,7 +73,7 @@ def vectorize_sentences(sentences, vectors):
     """
     vec = []
     for sen in sentences:
-        res = word2vec.vectorize_string(vectors, sen)
+        res = vectors.vectorize_string(sen)
         vec.append(res)
     vec = np.array(vec)
     

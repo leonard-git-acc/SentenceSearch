@@ -2,9 +2,9 @@ import os
 import json
 import pickle
 import numpy as np
-from word2vec import load_word_vectors, vectorize_string
+from word2vec import WordVectors
 from nltk.tokenize import sent_tokenize
-from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, get_sample_len
+from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison
 
 DOC_DIR = "C:/Users/leona/Downloads/dateien/datasearch1/ee_to_trax/storage/content"
 KEYEDVECTORS_PATH = "./data/german.model"
@@ -14,7 +14,7 @@ SENTENCE_SIZE = 24
 
 def main():
     files = os.listdir(DOC_DIR)
-    word_vec = load_word_vectors(KEYEDVECTORS_PATH)
+    word_vec = WordVectors
 
     for name in files:
         try:
@@ -32,7 +32,7 @@ def main():
 def get_vec_doc(text, vectors):
     text = text.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue")
     sentences = sent_tokenize(text)
-    sentences = vectorize_sentences(sentences, vectors)
+    sentences = vectors.vectorize_sentences(sentences, vectors)
     doc = doc_padding(sentences, DOC_SIZE, SENTENCE_SIZE, vectors.vector_size)
 
     return doc

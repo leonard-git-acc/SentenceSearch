@@ -1,15 +1,15 @@
 import os
 import json
-import word2vec
 import math
 import numpy as np
+from word2vec import WordVectors
 from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, checksum
 
-def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
+def create_qas_generator(inputPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
     interFile = open(inputPath, "r")
     interJSON = json.load(interFile)
 
-    word_vectors = word2vec.load_word_vectors(keyedVectorsPath)
+    word_vectors = WordVectors()
     word_amount = maxDocumentSentences * maxSentenceWords + maxSentenceWords * 2
     
     while True: 
@@ -31,7 +31,7 @@ def create_qas_generator(inputPath, keyedVectorsPath, maxDocumentSentences, maxS
                 question = qa["question"]
                 answer = qa["answerSentence"]
 
-                quesVec = word2vec.vectorize_string(word_vectors, question) #2D array (words, vector_size)
+                quesVec = word_vectors.vectorize_string(question) #2D array (words, vector_size)
                 quesVec = sentence_padding(quesVec, maxSentenceWords, word_vectors.vector_size) #2D array padded
 
                 for i, sentence in enumerate(docVec):

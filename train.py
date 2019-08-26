@@ -9,7 +9,6 @@ from create_model import create_model_nn, create_model_cnn, create_model_lstm
 flags = tf.flags
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string("keyedvectors_path", None, "Path to keyed vectors file")
 flags.DEFINE_string("train_path", None, "Path to train json file")
 flags.DEFINE_string("test_path", None, "Path to test json file")
 flags.DEFINE_string("out_dir", None, "Output dir of the model and logs")
@@ -29,20 +28,19 @@ NAME = "sentsearch_nn_{}".format(int(time.time()))
 
 def main(_):
     tf.logging.set_verbosity(tf.logging.INFO)
-
     model = None
+
     if FLAGS.saved_model_path != None:
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_lstm(get_sample_shape(FLAGS.max_document_sentences, FLAGS.max_sentence_words, 300))
+        model = create_model_lstm(get_sample_shape(FLAGS.max_document_sentences, FLAGS.max_sentence_words, 128))
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
     if FLAGS.do_train:
         train_gen = create_qas_generator(
-                FLAGS.train_path, 
-                FLAGS.keyedvectors_path, 
+                FLAGS.train_path,
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
@@ -58,8 +56,7 @@ def main(_):
     if FLAGS.do_test:
         print("Test started!")
         test_gen = create_qas_generator(
-                FLAGS.test_path, 
-                FLAGS.keyedvectors_path, 
+                FLAGS.test_path,
                 FLAGS.max_document_sentences, 
                 FLAGS.max_sentence_words, 
                 mode="eval")
@@ -73,6 +70,5 @@ def main(_):
 
 
 if __name__ == "__main__":
-    flags.mark_flag_as_required("keyedvectors_path")
     flags.mark_flag_as_required("out_dir")
     tf.app.run(main=main)

@@ -1,4 +1,5 @@
 from gensim.models import Word2Vec, KeyedVectors
+from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -7,54 +8,70 @@ import numpy as np
 class WordVectors:
     def __init__(self):
         self.embedder = hub.Module("https://tfhub.dev/google/nnlm-de-dim128-with-normalization/1")
+        self.stop_words = set(stopwords.words("english"))
         self.vector_size = 128
         self.session = tf.Session()
         self.session.run(tf.global_variables_initializer())
         self.session.run(tf.tables_initializer())
 
-    def embed_words(self, words):
+
+    def __call__(self, words):
+        """Embedds a list of words as vector array"""
         vectors = self.session.run(self.embedder(words))
-        return vectors[0]
+        return vectors
+
 
     def vectorize_string(self, string):
+        """Embedds and preprocesses a string as vector array"""
         words = word_tokenize(string)
-        words = __filter_words__(self, words)
+        words = self._filter_words(words)
     
-        sentence = np.zeros((len(words), self.vector_size))
-        for i, w in enumerate(words):
-            vec = None
-            if w in self:
-                vec = self[w]
-            else:
-                vec = self["unknown"]
-            sentence[i][:len(vec)] = vec
-
-        return sentence
-
-
-def load_word_vectors(path, binary=True):
-    word_vectors = KeyedVectors.load_word2vec_format(path, binary=binary, unicode_errors='ignore')
-    return word_vectors
-
-
-
-
-
-def __filter_words__(vectors, words):
-    for i, w in enumerate(words):
-        if any(not char.isalpha() for char in w) or w == "and" or w == "a" or w == "of":
-            words[i] = ""
-        if any(char.isdigit() for char in w):
-            words[i] = "number"
-        if w == "?":
-            words[i] = "question"
-        if w == "." or w == "!":
-            words[i] = "dot"
+        vec = self(words)
         
-        words[i] = words[i].lower()
+        return vec
 
-    words = list(filter(lambda x: x != "", words))
-    return words
+    def vectorize_sentences(self, sentences):
+        """Embedds and preprocesses a list of strings as list of vector arrays."""
+        words = []
+        word_count = []
+
+        for sen in sentences: 
+            w = word_tokenize(sen)
+            w = self._filter_words(w)
+
+            words.extend(w) #collect all words in list
+            word_count.append(len(w)) #save sentence word count after filter
+
+        vec = self(words)
+        senVec = []
+
+        for i, val in enumerate(word_count): #reconstruct the sentences
+            if i == 0: 
+                senVec.append(vec[0:val])
+            else:
+                senVec.append(vec[word_count[i - 1]:val])
+
+        return senVec
+
+
+    def _filter_words(self, words):
+        for i, w in enumerate(words):
+
+            if w in ".:-_,;#'+*/()[]{}&$%§=":        #filter symbols
+                words[i] = ""
+            if w in self.stop_words:                #filter stop words
+                words[i] = ""
+            if any(char.isdigit() for char in w):   #filter numbers
+                words[i] = "[NUM]"
+            if w == "?":                            #mark question ending
+                words[i] = "[QES]"
+            if w == "." or w == "!":                #mark sentence ending
+                words[i] = "[SEP]"
+            
+            words[i] = words[i].lower()
+        
+        words = list(filter(lambda x: x != "", words))
+        return words
 
 
 
