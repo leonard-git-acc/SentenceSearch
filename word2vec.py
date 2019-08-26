@@ -1,37 +1,44 @@
 from gensim.models import Word2Vec, KeyedVectors
 from nltk.tokenize import word_tokenize
+import tensorflow as tf
+import tensorflow_hub as hub
 import numpy as np
+
+class WordVectors:
+    def __init__(self):
+        self.embedder = hub.Module("https://tfhub.dev/google/nnlm-de-dim128-with-normalization/1")
+        self.vector_size = 128
+        self.session = tf.Session()
+        self.session.run(tf.global_variables_initializer())
+        self.session.run(tf.tables_initializer())
+
+    def embed_words(self, words):
+        vectors = self.session.run(self.embedder(words))
+        return vectors[0]
+
+    def vectorize_string(self, string):
+        words = word_tokenize(string)
+        words = __filter_words__(self, words)
+    
+        sentence = np.zeros((len(words), self.vector_size))
+        for i, w in enumerate(words):
+            vec = None
+            if w in self:
+                vec = self[w]
+            else:
+                vec = self["unknown"]
+            sentence[i][:len(vec)] = vec
+
+        return sentence
+
 
 def load_word_vectors(path, binary=True):
     word_vectors = KeyedVectors.load_word2vec_format(path, binary=binary, unicode_errors='ignore')
     return word_vectors
 
-def vectorize_string(vectors, string):
-    words = word_tokenize(string)
-    words = __filter_words__(vectors, words)
-    
-    sentence = np.zeros((len(words), vectors.vector_size))
-    for i, w in enumerate(words):
-        vec = None
-        if w in vectors:
-            vec = vectors[w]
-        else:
-            vec = vectors["unknown"]
-        sentence[i][:len(vec)] = vec
 
-    return sentence
 
-def devectorize_array(vectors, vectorized_string):
-    amount = vectorized_string.shape[0] // vectors.vector_size
-    result = []
-    for i in range(amount):
-        low = i * vectors.vector_size
-        high = low + vectors.vector_size
-        vec = vectorized_string[low:high]
-        word = vectors.most_similar(positive=[vec], topn=1)
-        if word[0][1] > 0.0:
-            result.append(word[0][0])
-    return result
+
 
 def __filter_words__(vectors, words):
     for i, w in enumerate(words):
