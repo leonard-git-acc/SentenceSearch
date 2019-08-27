@@ -5,7 +5,7 @@ import tensorflow as tf
 from preprocessing import get_sample_shape
 from qas_generator import create_qas_generator
 from qas_simple_generator import create_qas_simple_generator
-from create_model import create_model_nn, create_model_cnn, create_model_lstm
+from create_model import create_model
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -35,7 +35,7 @@ def main(_):
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_lstm((3, 128))
+        model = create_model((3, 128))
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
@@ -44,11 +44,16 @@ def main(_):
                 FLAGS.train_path,
                 batchSize=FLAGS.batch_size,
                 mode="train")
+        
+        x_train = np.load("./data/train_data.npy")
+        y_train = np.load("./data/train_labels.npy")
+        
+        model.fit(x_train, y_train, FLAGS.batch_size, 10)
 
-        model.fit_generator(
-                train_gen,
-                steps_per_epoch=FLAGS.batches_per_epoch,
-                epochs=FLAGS.epochs)
+        #model.fit_generator(
+        #        train_gen,
+        #        steps_per_epoch=FLAGS.batches_per_epoch,
+        #        epochs=FLAGS.epochs)
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
         

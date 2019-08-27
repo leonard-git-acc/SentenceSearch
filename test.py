@@ -1,6 +1,4 @@
+import os
 
-collection = ["a", "b", "c", "d", "e", "f"]
-
-a, b, c, *rest = collection
-
-print(rest)
+print(os.environ)
+print(os.environ["TFHUB_CACHE_DIR"])

@@ -5,8 +5,8 @@ from word2vec import WordVectors
 import tensorflow as tf
 from nltk.tokenize import sent_tokenize
 
-TEXT_FILE = "./data/text.txt"
-MODEL_PATH = "./output/sentsearch_gru_1566910005.model"
+TEXT_FILE = "./text.txt"
+MODEL_PATH = "./nlp.model"
 
 word_vec = WordVectors()
 def main():

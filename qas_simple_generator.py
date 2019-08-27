@@ -26,7 +26,6 @@ def create_qas_simple_generator(inputPath, batchSize=32, mode="train"):
             doc = paragraph["doc"]
             docText = word_vectors._reconstruct_string(doc)
 
-
             for qa in paragraph["qas"]:
                 question = qa["question"]
                 answer = qa["answerSentence"]
