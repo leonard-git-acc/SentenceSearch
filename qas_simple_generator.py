@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import time
 import numpy as np
 from word2vec import WordVectors
 from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, checksum
@@ -12,6 +13,8 @@ def create_qas_simple_generator(inputPath, batchSize=32, mode="train"):
     word_vectors = WordVectors()
 
     while True: 
+        rawBatch = []
+
         data = np.zeros((batchSize, 3, word_vectors.vector_size))
         labels = np.zeros((batchSize, 2))
 
@@ -31,24 +34,29 @@ def create_qas_simple_generator(inputPath, batchSize=32, mode="train"):
                 collection = [question, docText]
                 collection.extend(doc)
 
-                quesVec, docTextVec, *docVecs = word_vectors.vectorize_strings(collection)
-
-                for i, sentence in enumerate(docVecs):
+                for i, sentence in enumerate(doc):
                     #balances trainig data: 50% positives and 50% negatives
                     if mode == "train":
                         if trainSwitch and answer != i:
                             continue
 
                     trainSwitch = not trainSwitch
-                    sample = np.array([quesVec, sentence, docTextVec])
-                    
-                    data[batchCount] = sample
+
+                    rawBatch.extend([question, sentence, docText]) #collect all samples as strings
                     labels[batchCount][int(answer == i)] = 1
 
                     batchCount = batchCount + 1
                     totalCount = totalCount + 1
 
                     if not (batchCount < batchSize):
+                        result = word_vectors.vectorize_strings(rawBatch) #embedd all samples at once, to improve performance
+
+                        for i in range(len(result) // 3):
+                            if i == 0:
+                                data[i] = np.array(result[0:(i + 1) * 3])
+                            else:
+                                data[i] = np.array(result[i * 3:(i + 1) * 3])
+                        
                         if mode == "train":
                             shuffle_in_unison(data, labels)
                             #print(checksum(data))
@@ -59,4 +67,5 @@ def create_qas_simple_generator(inputPath, batchSize=32, mode="train"):
                         
                         data = np.zeros((batchSize, 3, word_vectors.vector_size))
                         labels = np.zeros((batchSize, 2))
+                        rawBatch = []
                         batchCount = 0

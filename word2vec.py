@@ -7,7 +7,10 @@ import numpy as np
 
 class WordVectors:
     def __init__(self):
-        self.embedder = hub.Module("https://tfhub.dev/google/nnlm-de-dim128-with-normalization/1")
+        self.module = hub.Module("https://tfhub.dev/google/nnlm-en-dim128-with-normalization/1")
+        self.placeholder = tf.placeholder(tf.string, [None])
+        self.embedder = self.module(self.placeholder)
+
         self.stop_words = set(stopwords.words("english"))
         self.vector_size = 128
         self.session = tf.Session()
@@ -17,7 +20,7 @@ class WordVectors:
 
     def __call__(self, words):
         """Embedds a list of words as vector array"""
-        vectors = self.session.run(self.embedder(words))
+        vectors = self.session.run(self.embedder, feed_dict={self.placeholder: words})
         return vectors
 
 
