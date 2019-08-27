@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from preprocessing import get_sample_shape
 from qas_generator import create_qas_generator
+from qas_simple_generator import create_qas_simple_generator
 from create_model import create_model_nn, create_model_cnn, create_model_lstm
 
 flags = tf.flags
@@ -27,22 +28,20 @@ flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 NAME = "sentsearch_nn_{}".format(int(time.time()))
 
 def main(_):
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.ERROR)
     model = None
 
     if FLAGS.saved_model_path != None:
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_lstm(get_sample_shape(FLAGS.max_document_sentences, FLAGS.max_sentence_words, 128))
+        model = create_model_lstm((3, 128))
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
     if FLAGS.do_train:
-        train_gen = create_qas_generator(
+        train_gen = create_qas_simple_generator(
                 FLAGS.train_path,
-                FLAGS.max_document_sentences, 
-                FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
                 mode="train")
 
@@ -55,10 +54,8 @@ def main(_):
         
     if FLAGS.do_test:
         print("Test started!")
-        test_gen = create_qas_generator(
+        test_gen = create_qas_simple_generator(
                 FLAGS.test_path,
-                FLAGS.max_document_sentences, 
-                FLAGS.max_sentence_words, 
                 mode="eval")
 
         val_loss, val_acc = model.evaluate_generator(

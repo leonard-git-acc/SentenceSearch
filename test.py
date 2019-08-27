@@ -1,9 +1,6 @@
-from word2vec import WordVectors
 
-word_vec = WordVectors()
+collection = ["a", "b", "c", "d", "e", "f"]
 
-string = "This is a very interesting program!"
+a, b, c, *rest = collection
 
-res = word_vec([string])
-print(res)
-print(res.shape)
+print(rest)
