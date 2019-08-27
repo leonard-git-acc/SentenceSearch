@@ -1,5 +1,4 @@
-python ./train.py --keyedvectors_path="./data/english.bin" ^
---train_path="./data/train.json" ^
+python ./train.py --train_path="./data/train.json" ^
 --test_path="./data/test.json" ^
 --out_dir="./output" ^
 --epochs="1" ^

@@ -11,7 +11,7 @@ def create_model_cnn():
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(100, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
+    model.add(tf.keras.layers.Dense(2, activation=tf.nn.sigmoid))
 
     opt = tf.keras.optimizers.Adam(lr=1e-3)
     model.compile(optimizer=opt,
@@ -26,7 +26,33 @@ def create_model_nn():
     model.add(tf.keras.layers.Dense(1000, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(500, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dense(10, activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(1, activation=tf.nn.sigmoid))
+    model.add(tf.keras.layers.Dense(2, activation=tf.nn.sigmoid))
+
+    opt = tf.keras.optimizers.Adam(lr=1e-3)
+    model.compile(optimizer=opt,
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+
+    return model
+
+def create_model_lstm(input_shape):
+    model = tf.keras.models.Sequential()
+    model.add(tf.keras.layers.CuDNNLSTM(256, input_shape=input_shape, return_sequences=True))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.BatchNormalization())
+
+    model.add(tf.keras.layers.CuDNNLSTM(256, input_shape=input_shape, return_sequences=True))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.BatchNormalization())
+
+    model.add(tf.keras.layers.CuDNNLSTM(256, input_shape=input_shape))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.BatchNormalization())
+
+    model.add(tf.keras.layers.Dense(64, activation="relu"))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.Dense(16, activation="relu"))
+    model.add(tf.keras.layers.Dense(2, activation=tf.nn.sigmoid))
 
     opt = tf.keras.optimizers.Adam(lr=1e-3)
     model.compile(optimizer=opt,
