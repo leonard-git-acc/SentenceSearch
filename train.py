@@ -1,10 +1,15 @@
+"""
+For training and testing of the SentenceSearch model with the modified SQuAD dataset.
+"""
+
 import time
 import os
 import numpy as np
 import tensorflow as tf
 from preprocessing import get_sample_shape
 from qas_generator import create_qas_generator
-from create_model import create_model_nn, create_model_cnn, create_model_lstm
+from qas_generator import create_qas_generator
+from create_model import create_model
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -24,27 +29,32 @@ flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will cre
 flags.DEFINE_boolean("do_train", True, "True, if model should be trained")
 flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 
-NAME = "sentsearch_nn_{}".format(int(time.time()))
+NAME = "sentsearch_gru_{}".format(int(time.time()))
+
 
 def main(_):
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.logging.set_verbosity(tf.logging.ERROR)
     model = None
 
     if FLAGS.saved_model_path != None:
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model_lstm(get_sample_shape(FLAGS.max_document_sentences, FLAGS.max_sentence_words, 128))
+        model = create_model((3, 128))
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
+
     if FLAGS.do_train:
         train_gen = create_qas_generator(
                 FLAGS.train_path,
-                FLAGS.max_document_sentences, 
-                FLAGS.max_sentence_words, 
                 batchSize=FLAGS.batch_size,
                 mode="train")
+        
+        #x_train = np.load("./data/train_data.npy")
+        #y_train = np.load("./data/train_labels.npy")
+        
+        #model.fit(x_train, y_train, FLAGS.batch_size, FLAGS.epochs)
 
         model.fit_generator(
                 train_gen,
@@ -57,8 +67,6 @@ def main(_):
         print("Test started!")
         test_gen = create_qas_generator(
                 FLAGS.test_path,
-                FLAGS.max_document_sentences, 
-                FLAGS.max_sentence_words, 
                 mode="eval")
 
         val_loss, val_acc = model.evaluate_generator(

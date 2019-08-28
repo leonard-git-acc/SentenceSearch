@@ -1,58 +1,40 @@
+"""Searching in unknown text files"""
+
 import os
 import json
 import numpy as np
-import word2vec
+from word2vec import WordVectors
 import tensorflow as tf
-from preprocessing import doc_padding, sentence_padding, vectorize_sentences
 from nltk.tokenize import sent_tokenize
 
 TEXT_FILE = "./data/text.txt"
-KEYEDVECTORS_PATH = "./data/english.bin"
-MODEL_PATH = "./output/sentsearch_nn_1566389698.model"
+MODEL_PATH = "./output/sentsearch_gru_10_1566910005.model"
 
-DOC_SIZE = 16
-word_vec = word2vec.load_word_vectors(KEYEDVECTORS_PATH)
+
 def main():
-    word_vec = word2vec.load_word_vectors(KEYEDVECTORS_PATH)
+    word_vec = WordVectors()
     model = tf.keras.models.load_model(MODEL_PATH)
 
     f = open(TEXT_FILE, "r")
     text = f.read()
+    textVec = word_vec.vectorize_string(text)
     sentences = sent_tokenize(text)
-    sentVec = vectorize_sentences(sentences, word_vec)
-
-    docs = []
-    doc = []
-    for i, sen in enumerate(sentVec):
-        doc.append(sen)
-        if len(doc) >= DOC_SIZE or i >= len(sentVec) - 1:
-            padded = doc_padding(np.array(doc), 16, 24, word_vec.vector_size)
-            docs.append(padded)
-            doc = []
+    sentVec = word_vec.vectorize_strings(sentences)
 
     while True:
+        print("Question:")
         question = input()
-        quesVec = word2vec.vectorize_string(word_vec, question).flatten()
-        quesVec = sentence_padding(quesVec, 24, word_vec.vector_size)
+        quesVec = word_vec.vectorize_string(question)
 
-        print(word2vec.devectorize_array(word_vec, quesVec))
-
-        for i, d in enumerate(docs):
-            res = evaluate_doc(quesVec, d, model)
-            print("---------")
-            print(sentences[DOC_SIZE * i + np.argmax(res)])
-
-
-def evaluate_doc(quesVec, docVec, model):
-    predictions = np.zeros(docVec.shape[0])
-    docVecFlat = docVec.flatten()
-    for i, senVec in enumerate(docVec):
-         sample = np.concatenate([quesVec, senVec, docVecFlat])
-         print(word2vec.devectorize_array(word_vec, sample))
-         sample = np.array([sample])
-         pred = model.predict(sample)
-         predictions[i] = pred[0]
-    return predictions
+        results = []
+        for i, sent in enumerate(sentVec):
+            res = model.predict(np.array([[quesVec, sent, textVec]]))[0]
+            results.append(res[1] - res[0])
+        results = np.array(results)
+        for i in range(3):
+            index = np.argmax(results)
+            results[index] = -1 
+            print(f"{i}: {sentences[index]}")
 
 
 if __name__ == "__main__":

@@ -1,27 +1,30 @@
+"""
+Parses the SQuAD dataset to an easier to understand format. It aims at finding the correct sentence,
+instead of the correct span in the text and therefore removes answer_start and answer completely and
+replaces it with answerSentence, which is a index of the correct sentence.
+"""
+
 import os
 import json
-import sys
 from nltk.tokenize import sent_tokenize
 from preprocessing import get_sentence_index
 
-DOC_SIZE = 16
-SENTENCE_SIZE = 24
+INPUT_PATH = "./train-v1.json" #Path to squad json file
+OUT_PATH = "./train.json" #output for parsed json file
+DOC_SIZE = 16 #how many sentences per "doc"
 
 def main():
-    args = sys.argv
-    squad_path = args[1]
-    out_path = args[2]
-
-    squadFile = open(squad_path, "r")
+    squadFile = open(INPUT_PATH, "r")
     squadJSON = json.load(squadFile)
     data = []
 
-    total_texts = []
-    total_qas = []
+    total_texts = [] #list of all topics
+    total_qas = [] #list of all questions and answers of all topics
 
     for dataSQUAD in squadJSON["data"]: 
-        topic_text = []
-        topic_qas = []
+        topic_text = [] #list of all sentences in a topic
+        topic_qas = [] #list of all questions and answers in a topic 
+
         for paragraphSQUAD in dataSQUAD["paragraphs"]:
             context = paragraphSQUAD["context"]
             sentences = sent_tokenize(context)
@@ -39,7 +42,7 @@ def main():
         total_texts.append(topic_text)
         total_qas.append(topic_qas)
 
-
+    #Create docs, that have DOC_SIZE sentences within them
     for topic_text, topic_qas in zip(total_texts, total_qas):
         obj = {}
         for i in range(len(topic_text) // DOC_SIZE + DOC_SIZE):
@@ -57,7 +60,7 @@ def main():
                 obj = {"doc": doc, "qas": qas}
                 data.append(obj)
 
-    outFile = open(out_path, "w")
+    outFile = open(OUT_PATH, "w")
     json.dump(data, outFile)
 
 

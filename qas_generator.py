@@ -1,19 +1,19 @@
 import os
 import json
-import math
 import numpy as np
 from word2vec import WordVectors
-from preprocessing import doc_padding, sentence_padding, vectorize_sentences, shuffle_in_unison, checksum
+from preprocessing import shuffle_in_unison, checksum
 
-def create_qas_generator(inputPath, maxDocumentSentences, maxSentenceWords, batchSize=32, mode="train"):
+def create_qas_generator(inputPath, batchSize=32, mode="train"):
     interFile = open(inputPath, "r")
     interJSON = json.load(interFile)
 
     word_vectors = WordVectors()
-    word_amount = maxDocumentSentences * maxSentenceWords + maxSentenceWords * 2
-    
+
     while True: 
-        data = np.zeros((batchSize, word_amount, word_vectors.vector_size))
+        rawBatch = []
+
+        data = np.zeros((batchSize, 3, word_vectors.vector_size))
         labels = np.zeros((batchSize, 2))
 
         batchCount = 0
@@ -22,34 +22,38 @@ def create_qas_generator(inputPath, maxDocumentSentences, maxSentenceWords, batc
         
         for paragraph in interJSON:
             doc = paragraph["doc"]
-
-            docVec = vectorize_sentences(doc, word_vectors) #3D array (sentences, words, vector_size)
-            docVec = doc_padding(docVec, maxDocumentSentences, maxSentenceWords, word_vectors.vector_size) #3D array padded
-            docVecFlat = docVec.reshape(maxDocumentSentences * maxSentenceWords, word_vectors.vector_size)
+            docText = word_vectors._reconstruct_string(doc)
 
             for qa in paragraph["qas"]:
                 question = qa["question"]
                 answer = qa["answerSentence"]
 
-                quesVec = word_vectors.vectorize_string(question) #2D array (words, vector_size)
-                quesVec = sentence_padding(quesVec, maxSentenceWords, word_vectors.vector_size) #2D array padded
+                collection = [question, docText]
+                collection.extend(doc)
 
-                for i, sentence in enumerate(docVec):
+                for i, sentence in enumerate(doc):
                     #balances trainig data: 50% positives and 50% negatives
                     if mode == "train":
                         if trainSwitch and answer != i:
                             continue
 
                     trainSwitch = not trainSwitch
-                    item = np.concatenate([quesVec, sentence, docVecFlat])
-                    
-                    data[batchCount] = item
+
+                    rawBatch.extend([question, sentence, docText]) #collect all samples as strings
                     labels[batchCount][int(answer == i)] = 1
 
                     batchCount = batchCount + 1
                     totalCount = totalCount + 1
 
                     if not (batchCount < batchSize):
+                        result = word_vectors.vectorize_strings(rawBatch) #embedd all samples at once, to improve performance
+
+                        for i in range(len(result) // 3):
+                            if i == 0:
+                                data[i] = np.array(result[0:(i + 1) * 3])
+                            else:
+                                data[i] = np.array(result[i * 3:(i + 1) * 3])
+                        
                         if mode == "train":
                             shuffle_in_unison(data, labels)
                             #print(checksum(data))
@@ -58,6 +62,7 @@ def create_qas_generator(inputPath, maxDocumentSentences, maxSentenceWords, batc
                             print("TestBatch: " + str(totalCount))
                             yield (data, labels)
                         
-                        data = np.zeros((batchSize, word_amount, word_vectors.vector_size))
+                        data = np.zeros((batchSize, 3, word_vectors.vector_size))
                         labels = np.zeros((batchSize, 2))
+                        rawBatch = []
                         batchCount = 0
