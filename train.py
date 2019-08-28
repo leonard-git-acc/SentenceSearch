@@ -1,10 +1,14 @@
+"""
+For training and testing of the SentenceSearch model with the modified SQuAD dataset.
+"""
+
 import time
 import os
 import numpy as np
 import tensorflow as tf
 from preprocessing import get_sample_shape
 from qas_generator import create_qas_generator
-from qas_simple_generator import create_qas_simple_generator
+from qas_generator import create_qas_generator
 from create_model import create_model
 
 flags = tf.flags
@@ -25,7 +29,8 @@ flags.DEFINE_integer("batch_size", 32, "Amount of samples the generator will cre
 flags.DEFINE_boolean("do_train", True, "True, if model should be trained")
 flags.DEFINE_boolean("do_test", True, "True, if model should be tested")
 
-NAME = "sentsearch_nn_{}".format(int(time.time()))
+NAME = "sentsearch_gru_{}".format(int(time.time()))
+
 
 def main(_):
     tf.logging.set_verbosity(tf.logging.ERROR)
@@ -39,27 +44,28 @@ def main(_):
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
+
     if FLAGS.do_train:
-        train_gen = create_qas_simple_generator(
+        train_gen = create_qas_generator(
                 FLAGS.train_path,
                 batchSize=FLAGS.batch_size,
                 mode="train")
         
-        x_train = np.load("./data/train_data.npy")
-        y_train = np.load("./data/train_labels.npy")
+        #x_train = np.load("./data/train_data.npy")
+        #y_train = np.load("./data/train_labels.npy")
         
-        model.fit(x_train, y_train, FLAGS.batch_size, 10)
+        #model.fit(x_train, y_train, FLAGS.batch_size, FLAGS.epochs)
 
-        #model.fit_generator(
-        #        train_gen,
-        #        steps_per_epoch=FLAGS.batches_per_epoch,
-        #        epochs=FLAGS.epochs)
+        model.fit_generator(
+                train_gen,
+                steps_per_epoch=FLAGS.batches_per_epoch,
+                epochs=FLAGS.epochs)
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
         
     if FLAGS.do_test:
         print("Test started!")
-        test_gen = create_qas_simple_generator(
+        test_gen = create_qas_generator(
                 FLAGS.test_path,
                 mode="eval")
 

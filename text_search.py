@@ -1,3 +1,5 @@
+"""Searching in unknown text files"""
+
 import os
 import json
 import numpy as np
@@ -6,10 +8,11 @@ import tensorflow as tf
 from nltk.tokenize import sent_tokenize
 
 TEXT_FILE = "./data/text.txt"
-MODEL_PATH = "./output/sentsearch_gru_1566910005.model"
+MODEL_PATH = "./output/sentsearch_gru_10_1566910005.model"
 
-word_vec = WordVectors()
+
 def main():
+    word_vec = WordVectors()
     model = tf.keras.models.load_model(MODEL_PATH)
 
     f = open(TEXT_FILE, "r")

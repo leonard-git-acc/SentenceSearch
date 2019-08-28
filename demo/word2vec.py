@@ -1,4 +1,3 @@
-from gensim.models import Word2Vec, KeyedVectors
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import tensorflow as tf
@@ -40,7 +39,6 @@ class WordVectors:
             filtered.append(self._filter_string(s))
 
         vecs = self(filtered)
-
         return vecs
 
 
@@ -48,7 +46,7 @@ class WordVectors:
         words = word_tokenize(string)
 
         for i, w in enumerate(words):
-            if w in ".:-_,;#'+*/()[]{}&$%§´`'=":       #filter symbols
+            if w in ".:-_,;#'+*/()[]{}&$%§´`'=’":   #filter symbols
                 words[i] = ""
             if w in self.stop_words:                #filter stop words
                 words[i] = ""

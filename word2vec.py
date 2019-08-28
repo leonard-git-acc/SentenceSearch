@@ -1,4 +1,5 @@
-from gensim.models import Word2Vec, KeyedVectors
+"""Word/Sentence/Text embeddings as vectors"""
+
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import tensorflow as tf
@@ -18,9 +19,9 @@ class WordVectors:
         self.session.run(tf.tables_initializer())
 
 
-    def __call__(self, words):
-        """Embedds a list of words as vector array"""
-        vectors = self.session.run(self.embedder, feed_dict={self.placeholder: words})
+    def __call__(self, strings):
+        """Embedds a list of strings as vector array"""
+        vectors = self.session.run(self.embedder, feed_dict={self.placeholder: strings})
         return vectors
 
 
@@ -65,6 +66,7 @@ class WordVectors:
         string = self._reconstruct_string(words)
 
         return string
+
 
     def _reconstruct_string(self, words):
         result = ""
