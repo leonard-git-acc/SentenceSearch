@@ -3,15 +3,15 @@ import tensorflow as tf
 
 def create_model(input_shape):
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.CuDNNLSTM(128, input_shape=input_shape, return_sequences=True))
+    model.add(tf.keras.layers.CuDNNGRU(128, input_shape=input_shape, return_sequences=True))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.BatchNormalization())
 
-    model.add(tf.keras.layers.CuDNNLSTM(128, input_shape=input_shape, return_sequences=True))
+    model.add(tf.keras.layers.CuDNNGRU(128, input_shape=input_shape, return_sequences=True))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.BatchNormalization())
 
-    model.add(tf.keras.layers.CuDNNLSTM(128, input_shape=input_shape))
+    model.add(tf.keras.layers.CuDNNGRU(128, input_shape=input_shape))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.BatchNormalization())
 
