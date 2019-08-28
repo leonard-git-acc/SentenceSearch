@@ -15,10 +15,11 @@ When testing the demo I found some interesting examples, which demonstrate what 
 ## Setup
 To run SentenceSearch and its demo it is necessary to install some packages:
 
-- pip install tensorflow (or the gpu version)
+- pip install tensorflow-gpu (if you want to use the cpu version change the CuDNNGRU's to GRU's)
 - pip install tensorflow-hub
 - pip install numpy
 - pip install nltk
+    
     nltk needs some additional setup:
     - open python and run "import nltk" and "nltk.download", which opens a window
     - in collections download popular packages
