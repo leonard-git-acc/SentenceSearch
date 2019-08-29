@@ -40,7 +40,7 @@ def main(_):
         model = tf.keras.models.load_model(FLAGS.saved_model_path)
         model.summary()
     else:
-        model = create_model((3, 128))
+        model = create_model((4, 128))
 
     if not os.path.isdir(FLAGS.out_dir):
         tf.io.gfile.mkdir(FLAGS.out_dir)
@@ -51,15 +51,15 @@ def main(_):
                 batchSize=FLAGS.batch_size,
                 mode="train")
         
-        #x_train = np.load("./data/train_data.npy")
-        #y_train = np.load("./data/train_labels.npy")
+        x_train = np.load("./data/train_data.npy")
+        y_train = np.load("./data/train_labels.npy")
         
-        #model.fit(x_train, y_train, FLAGS.batch_size, FLAGS.epochs)
+        model.fit(x_train, y_train, FLAGS.batch_size, FLAGS.epochs)
 
-        model.fit_generator(
-                train_gen,
-                steps_per_epoch=FLAGS.batches_per_epoch,
-                epochs=FLAGS.epochs)
+        #model.fit_generator(
+        #        train_gen,
+        #        steps_per_epoch=FLAGS.batches_per_epoch,
+        #        epochs=FLAGS.epochs)
                 
         model.save(os.path.join(FLAGS.out_dir, NAME + ".model"))
         

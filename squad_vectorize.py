@@ -20,14 +20,14 @@ from qas_generator import create_qas_generator
 INPUT_PATH = "./data/train.json"
 OUT_PATH = "./data/train"
 BATCH_SIZE = 64
-TOTAL_BATCHES = 3000
+TOTAL_BATCHES = 1500
 
 def main():
     tf.logging.set_verbosity(tf.logging.ERROR)
 
     generator = create_qas_generator(INPUT_PATH, BATCH_SIZE, "train")
 
-    data = np.zeros((TOTAL_BATCHES, BATCH_SIZE, 3, 128))
+    data = np.zeros((TOTAL_BATCHES, BATCH_SIZE, 4, 128))
     labels = np.zeros((TOTAL_BATCHES, BATCH_SIZE, 2))
 
     print("Started:")
@@ -39,7 +39,7 @@ def main():
         else:
             break
     print("Reshaping:")
-    data = data.reshape((BATCH_SIZE * TOTAL_BATCHES, 3, 128))
+    data = data.reshape((BATCH_SIZE * TOTAL_BATCHES, 4, 128))
     labels = labels.reshape((BATCH_SIZE * TOTAL_BATCHES, 2))
     print("Saving:")
     np.save(open(OUT_PATH + "_data.npy", "wb"), data)

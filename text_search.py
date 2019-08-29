@@ -8,7 +8,7 @@ import tensorflow as tf
 from nltk.tokenize import sent_tokenize
 
 TEXT_FILE = "./data/text.txt"
-MODEL_PATH = "./output/sentsearch_gru_10_1566910005.model"
+MODEL_PATH = "./output/sentsearch_gru_1567070506.model"
 
 
 def main():
@@ -26,15 +26,23 @@ def main():
         question = input()
         quesVec = word_vec.vectorize_string(question)
 
-        results = []
-        for i, sent in enumerate(sentVec):
-            res = model.predict(np.array([[quesVec, sent, textVec]]))[0]
-            results.append(res[1] - res[0])
-        results = np.array(results)
-        for i in range(3):
-            index = np.argmax(results)
-            results[index] = -1 
-            print(f"{i}: {sentences[index]}")
+        active = 0
+        for i in range(len(sentVec) - 1):
+            sample = [[quesVec, textVec, sentVec[active], sentVec[i + 1]]]
+            res = model.predict(np.array(sample))[0]
+            if res[0] < res[1]:
+                active = i + 1
+        print(sentences[active])
+
+        active = len(sentVec) - 1
+        for i in range(len(sentVec), -1, -1):
+            sample = [[quesVec, textVec, sentVec[active], sentVec[i - 1]]]
+            res = model.predict(np.array(sample))[0]
+            if res[0] < res[1]:
+                active = i - 1
+        print(sentences[active])
+
+
 
 
 if __name__ == "__main__":

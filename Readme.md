@@ -15,7 +15,7 @@ When testing the demo I found some interesting examples, which demonstrate what 
 ## Setup
 To run SentenceSearch and its demo it is necessary to install some packages:
 
-- pip install tensorflow-gpu (if you want to use the cpu version change the CuDNNGRU's to GRU's)
+- pip install tensorflow-gpu (if you want to use the cpu version change the CuDNNGRU's to GRU's in create_model.py)
 - pip install tensorflow-hub
 - pip install numpy
 - pip install nltk
